@@ -76,6 +76,13 @@ export async function register(req,res){
     })
 }
 
+export async function login(req,res){
+        const {email,password} = req.body;
+
+        const user = await userModel.findOne
+
+}
+
 export async function getMe(req,res){
     const token = req.headers.authorization?.split(" ")[ 1 ];
 
@@ -109,6 +116,19 @@ export async function refreshToken(req,res){
 
     const decoded = jwt.verify(refreshToken, config.JWT_SECRET)
 
+
+    const refreshTokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex");
+    const session = await sessionModel.findOne({
+        refreshTokenHash,
+        revoked: false
+    })
+
+    if(!session){
+        return res.status(401).json({
+            message: "Invalid refresh token"
+        })
+    }
+
     const accessToken = jwt.sign({
         id: decoded.id
     },  config.JWT_SECRET,
@@ -125,6 +145,12 @@ export async function refreshToken(req,res){
         }
     )
 
+
+    const newRefreshTokenHash = crypto.createHash("sha256").update(refreshToken).digit("hex")
+
+    session.refreshTokenHash = newRefreshTokenHash;
+    await session.save();
+
     res.cookie("refreshToken", newRefreshToken,{
         httpOnly: true,
         secure: true,
@@ -137,4 +163,61 @@ export async function refreshToken(req,res){
         token: accessToken
     
     })
+}
+
+export async function logout(req,res){
+    const refreshToken = req.cookies.refreshToken
+
+    if(!refreshToken){
+        res.status(400).json({
+            message:"Refresh token not found"
+        })
+    }
+
+    const refreshTokenHash = crypto.createHash("sha256").update(refreshToken).digest("hex")
+
+    const session = await sessionModel.findOne({
+        refreshTokenHash,
+        revoked: false
+    })
+
+    if(!session){
+        return res.status(400).json({
+            message: "Invalid refresh token"
+        })
+    }
+
+    session.revoked = true;
+    await session.save();
+
+    res.clearCookie("refreshToken")
+
+    res.status(200).json({
+        message:"Logged out successfully"
+    })
+}
+
+export async function logoutAll(req,res){
+    const refreshToken = req.cookies.refreshToken;
+
+    if(!refreshToken){
+        res.status(400).json({
+            message:"Refresh token not found"
+        
+        })
+    }
+
+    const decoded = jwt.verify(token, config.JWT_SECRET);
+
+    await sessionModel.updateMany({
+        user: decoded.id,
+        revoked: false
+    },  {
+        revoked: true
+    })
+
+    res.clearCookie(200).json({
+        message: "Logged out from all devices successfully"
+    })
+
 }
