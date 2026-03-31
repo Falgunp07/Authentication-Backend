@@ -5,7 +5,7 @@ import config from "../config/config.js";
 import sessionModel from "../models/session.model.js";
 import { sendEmail } from "../services/email.services.js";
 import otpModel from "../models/otp.model.js";
-import { generateOtp, getOtpHtml } from "../utils/otp.utils.js";
+import { generateOtp, getOtpHtml } from "../utils/utils.js";
 
 
 export async function register(req,res){
@@ -268,7 +268,7 @@ export async function verifyEmail(req,res){
     const {otp,email} = req.body;
     const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
 
-    otpDoc = await otpModel.findOne({
+    const otpDoc = await otpModel.findOne({
         email,
         otpHash
     })

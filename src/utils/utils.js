@@ -14,7 +14,7 @@ export function getOtpHtml(otp){
                 font-family: Arial, sans-serif;
                 background-color: #f4f4f4;
                 display: flex; 
-                jcontent: center;
+                justify-content: center;
                 align-items: center;
                 height: 100vh;  
             }
@@ -32,7 +32,7 @@ export function getOtpHtml(otp){
                 color: #333;
                 margin: 20px 0;
             }
-    <style> 
+    </style> 
 </head>
 <body>
     <div class="container">
