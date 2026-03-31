@@ -257,13 +257,13 @@ export async function logoutAll(req,res){
     const refreshToken = req.cookies.refreshToken;
 
     if(!refreshToken){
-        res.status(400).json({
+        return res.status(400).json({
             message:"Refresh token not found"
         
         })
     }
 
-    const decoded = jwt.verify(token, config.JWT_SECRET);
+    const decoded = jwt.verify(refreshToken, config.JWT_SECRET);
 
     await sessionModel.updateMany({
         user: decoded.id,
@@ -272,7 +272,7 @@ export async function logoutAll(req,res){
         revoked: true
     })
 
-    res.clearCookie(200).json({
+    res.clearCookie("refreshToken").status(200).json({
         message: "Logged out from all devices successfully"
     })
 

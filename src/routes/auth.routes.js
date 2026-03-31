@@ -23,4 +23,6 @@ authRouter.get("/logout", authController.logout)
 authRouter.get("/logout-all", authController.logoutAll)
 
 
+
+
 export default authRouter;
