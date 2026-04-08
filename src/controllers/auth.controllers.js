@@ -294,3 +294,65 @@ export async function verifyEmail(req,res){
         }
     })
 }
+
+// GET all active devices/sessions for the logged-in user
+export async function getActiveSessions(req, res) {
+    try {
+        // 1. Manually extract the token and verify it (like getMe)
+        const token = req.headers.authorization?.split(" ")[1];
+        if (!token) return res.status(401).json({ message: "Token not found" });
+        
+        const decoded = jwt.verify(token, config.JWT_SECRET);
+        const userId = decoded.id; // Get the user ID from the verified token
+
+        // 2. Find all active sessions for this user
+        const sessions = await sessionModel.find({ 
+            user: userId,
+            revoked: false 
+        }).select("-refreshTokenHash"); 
+
+        return res.status(200).json({
+            message: "Active sessions retrieved successfully",
+            sessions
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Invalid token or server error" });
+    }
+}
+
+
+// POST/DELETE to revoke a specific session (remote logout)
+export async function revokeSession(req, res) {
+    try {
+        // 1. Manually extract the token and verify it
+        const token = req.headers.authorization?.split(" ")[1];
+        if (!token) return res.status(401).json({ message: "Token not found" });
+        
+        const decoded = jwt.verify(token, config.JWT_SECRET);
+        const userId = decoded.id; // Get the user ID from the verified token
+
+        const { sessionId } = req.params;
+
+        // 2. Find the exact session and make sure it belongs to THIS user
+        const session = await sessionModel.findOne({ 
+            _id: sessionId, 
+            user: userId 
+        });
+
+        if (!session) {
+            return res.status(404).json({ message: "Session not found" });
+        }
+
+        // 3. Set revoked to true (this essentially kills the session)
+        session.revoked = true;
+        await session.save();
+
+        return res.status(200).json({
+            message: "Session successfully revoked"
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ message: "Invalid token or server error" });
+    }
+}
