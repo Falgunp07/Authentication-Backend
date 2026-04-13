@@ -19,7 +19,8 @@ export default function Dashboard() {
         const response = await axiosInstance.get("/sessions");
         
         // Save the array of devices into our React memory
-        setSessions(response.data.data || response.data);
+        // CORRECT: This targets the exact 'sessions' array sent by your backend
+        setSessions(response.data.sessions);
         setLoading(false); // Stop showing the loading message
       } catch (err) {
         console.error("Failed to load sessions:", err);

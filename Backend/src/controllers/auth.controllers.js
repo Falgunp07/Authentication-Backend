@@ -316,6 +316,10 @@ export async function getActiveSessions(req, res) {
             sessions
         });
     } catch (error) {
+         if (error.name === "TokenExpiredError") {
+             // If the error is specifically because of time running out, send a 401!
+             return res.status(401).json({ message: "Token has expired, please log in again." });
+        }
         console.error(error);
         return res.status(500).json({ message: "Invalid token or server error" });
     }

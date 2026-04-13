@@ -5,4 +5,19 @@ const axiosInstance = axios.create({
     withCredentials: true, 
 });
 
+axiosInstance.interceptors.request.use(
+    (config) => {
+        // 1. Grab the token that we saved during Login
+        const token = localStorage.getItem("token");
+        
+        // 2. If it exists, attach it to the "Authorization" header
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
 export default axiosInstance;
