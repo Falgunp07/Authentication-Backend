@@ -1,15 +1,17 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import axiosInstance from "../api/axiosInstance"; 
+import { AuthContext } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-  // 1. useState: This is React's way of remembering things. 
-  // We need to remember what the user is currently typing in the email/password boxes.
   // When 'setEmail' is called, React automatically re-draws the screen with the new value.
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   
   // We use this state to show error messages (like "Invalid password") to the user.
   const [error, setError] = useState("");
+  const {loginUser} = useContext(AuthContext)
+  const navigate = useNavigate()
 
   // 2. The Submit Function: This runs when the user clicks the "Login" button.
   // Notice it has 'async' because reaching out to the backend takes time.
@@ -32,10 +34,13 @@ export default function Login() {
       // 4. Success! If the backend returns a 200 status, we grab the token it sent us.
       const { token } = response.data;
       
-      // For now, we will just save the token in LocalStorage so the browser doesn't forget it
-      localStorage.setItem("token", token);
+      // Call our global 'loginUser' function from AuthContext instead of doing it manually
+      loginUser(token);
       
       console.log("Logged in perfectly! Token:", token);
+
+      // Now that we told the whole app we are logged in, bounce the user to the dashboard
+      navigate("/dashboard");
     } catch (err) {
       console.error("Login failed:", err);
       
@@ -62,7 +67,7 @@ export default function Login() {
             value={email}
             // onChange fires every single time the user presses a key. It updates the memory instantly!
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 w-full rounded border px-3 py-2 outline-none focus:border-blue-500" 
+            className="mt-1 w-full rounded border px-3 py-2 outline-none focus:border-green-500" 
           />
         </div>
 
@@ -79,7 +84,7 @@ export default function Login() {
 
         <button 
           type="submit" 
-          className="w-full rounded bg-blue-600 py-2 text-white hover:bg-blue-700"
+          className="w-full rounded bg-green-600 py-2 text-white hover:bg-green-700"
         >
           Sign In
         </button>
