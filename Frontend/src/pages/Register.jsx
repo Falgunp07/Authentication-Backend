@@ -29,8 +29,8 @@ export default function Register() {
 
       console.log("Registration successful!", response.data);
       
-      // 4. Send them to the login page so they can sign in with their new account
-      navigate("/login");
+      // 4. Send them to the verification page, and attach their email in the web URL!
+       navigate(`/verify?email=${encodeURIComponent(email)}`);
     } catch (err) {
       console.error("Registration failed:", err);
       // Grab the exact error message your backend sends

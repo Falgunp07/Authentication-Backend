@@ -6,6 +6,7 @@ import { AuthContext } from "./context/AuthContext";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Register from "./pages/Register";
+import VerifyEmail from "./pages/VerifyEmail";
 
 function App() {
   // 2. We grab the token from global state to check if the user is logged in
@@ -18,12 +19,12 @@ function App() {
         
         {/* The Login Route */}
         <Route path="/login" element={token ? <Navigate to="/dashboard" /> : <Login />} />
-
         <Route path="/dashboard" element={!token ? <Navigate to="/login" /> : <Dashboard />} />
 
         {/* The Catch-all Route (if they go to '/' or a random page, send them to login) */}
         <Route path="*" element={<Navigate to="/login" />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/verify" element={<VerifyEmail />} />
 
       </Routes>
     </BrowserRouter>
