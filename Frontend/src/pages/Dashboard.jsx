@@ -26,34 +26,38 @@ const parseUserAgent = (userAgent) => {
 };
 
 export default function Dashboard() {
-  // We grab the logoutUser function from our Global Memory so we can add a logout button!
   const { logoutUser } = useContext(AuthContext);
   
-  // 1. Create a state memory to hold our list of devices
+  // 1. Add a new state memory to hold our User Profile
+  const [user, setUser] = useState(null);
+  
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // 2. useEffect will run exactly ONCE when this Dashboard component first appears on the screen
   useEffect(() => {
-    const fetchSessions = async () => {
+    const fetchData = async () => {
       try {
-        // Send a GET request to http://localhost:3000/api/auth/sessions
-        const response = await axiosInstance.get("/sessions");
+        // 2. Fetch BOTH the User Profile AND the Sessions at the same time
+        const [userResponse, sessionsResponse] = await Promise.all([
+          axiosInstance.get("/get-me"),
+          axiosInstance.get("/sessions")
+        ]);
         
-        // Save the array of devices into our React memory
-        // CORRECT: This targets the exact 'sessions' array sent by your backend
-        setSessions(response.data.sessions);
-        setLoading(false); // Stop showing the loading message
+        // 3. Save both pieces of data into our React memory
+        setUser(userResponse.data.user);
+        setSessions(sessionsResponse.data.sessions);
+        setLoading(false);
       } catch (err) {
-        console.error("Failed to load sessions:", err);
-        setError("Could not load your active devices.");
+        console.error("Failed to load dashboard data:", err);
+        setError("Could not load your dashboard.");
         setLoading(false);
       }
     };
 
-    fetchSessions(); // Automatically call our function when the page loads
-  }, []); // The empty array [] means "only run this once when the screen loads"
+    fetchData();
+  }, []);
+
 
   // 3. Keep a function here to manually revoke a single session (remote logout)
   const handleRevokeSession = async (sessionId) => {
@@ -72,7 +76,17 @@ export default function Dashboard() {
       <div className="mx-auto max-w-4xl rounded-lg bg-white p-6 shadow-md">
         
         <div className="flex items-center justify-between border-b pb-4">
-          <h1 className="text-2xl font-bold text-gray-800">Your Active Devices</h1>
+          <div>
+            {/* 4. Display the username seamlessly */}
+            <h1 className="text-2xl font-bold text-gray-800">
+              Welcome, {user?.username || "User"}!
+            </h1>
+            <p className="text-sm text-gray-500">
+              {user?.email} 
+              {/* Show a cool verified badge if they completed the OTP step */}
+              {user?.verified && <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700">✓ Verified</span>}
+            </p>
+          </div>
           
           <button 
             onClick={logoutUser} 

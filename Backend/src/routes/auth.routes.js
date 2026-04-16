@@ -24,7 +24,7 @@ authRouter.get("/logout", authController.logout)
 authRouter.get("/logout-all", authController.logoutAll)
 
 //GET verify email
-authRouter.get("/verify-email", authController.verifyEmail)
+authRouter.post("/verify-email", authController.verifyEmail)
 
 // GET /api/auth/sessions -> Returns a list of devices (Chrome, Safari, iPhone, etc)
 authRouter.get("/sessions", authController.getActiveSessions);

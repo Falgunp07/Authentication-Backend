@@ -9,7 +9,7 @@ import { generateOtp, getOtpHtml } from "../utils/utils.js";
 
 
 export async function register(req,res){
-    const {username,email,password} = req.body;
+    const {username, email,password} = req.body;
 
     const isAlreadyRegistered = await userModel.findOne({
         $or:[
